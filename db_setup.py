@@ -33,14 +33,7 @@ def create_tables():
     A function to create the necessary tables for the project.
     """
     con = get_connection()
-    print("hej")
-    """
-    with connection:
-        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT * FROM ads;")
-            items = cursor.fetchall()
-    print(items)
-    """
+
     # Implement
     
   

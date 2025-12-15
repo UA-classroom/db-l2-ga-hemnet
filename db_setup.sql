@@ -3,13 +3,13 @@ DROP TABLE IF EXISTS user_favorites CASCADE;
 DROP TABLE IF EXISTS ad_images CASCADE;
 DROP TABLE IF EXISTS ads_real_estates CASCADE;
 DROP TABLE IF EXISTS ads CASCADE;
-DROP TABLE IF EXISTS apartment_profile CASCADE;
-DROP TABLE IF EXISTS house_profile CASCADE;
+DROP TABLE IF EXISTS apartment_profiles CASCADE;
+DROP TABLE IF EXISTS house_profiles CASCADE;
 DROP TABLE IF EXISTS real_estate_images CASCADE;
 DROP TABLE IF EXISTS real_estates CASCADE;
 DROP TABLE IF EXISTS real_estate_types CASCADE;
-DROP TABLE IF EXISTS customer_profile CASCADE;
-DROP TABLE IF EXISTS realtor_profile CASCADE;
+DROP TABLE IF EXISTS customer_profiles CASCADE;
+DROP TABLE IF EXISTS realtor_profiles CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS broker_agencies CASCADE;
 DROP TABLE IF EXISTS adresses CASCADE;
@@ -52,13 +52,13 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE
 );
 
-CREATE TABLE realtor_profile (
-    id INT PRIMARY KEY REFERENCES users(id),
+CREATE TABLE realtor_profiles (
+    id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     agency INT REFERENCES broker_agencies(id)
 );
 
-CREATE TABLE customer_profile (
-    id INT PRIMARY KEY REFERENCES users(id),
+CREATE TABLE customer_profiles (
+    id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     adress INT REFERENCES adresses(id)
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE real_estates (
     real_estate_type INT REFERENCES real_estate_types(id),
     municipal INT REFERENCES municipals(id),
     adress INT REFERENCES adresses(id),
-    size INT,
+    living_space INT,
     no_of_rooms INT
 );
 
@@ -82,12 +82,12 @@ CREATE TABLE real_estate_images (
     picture_link VARCHAR(255) UNIQUE NOT NULL
 );
 
-CREATE TABLE house_profile (
+CREATE TABLE house_profiles (
     id INT PRIMARY KEY REFERENCES real_estates(id),
     building_plot FLOAT
 );
 
-CREATE TABLE apartment_profile (
+CREATE TABLE apartment_profiles (
     id INT PRIMARY KEY REFERENCES real_estates(id),
     apartment_id VARCHAR(50),
     floor INT
@@ -96,10 +96,10 @@ CREATE TABLE apartment_profile (
 CREATE TABLE ads (
     id SERIAL PRIMARY KEY,
     agreement VARCHAR(255),
-    customer INT REFERENCES customer_profile(id),
+    customer INT REFERENCES customer_profiles(id),
     publish_date TIMESTAMPTZ,
 	end_date TIMESTAMPTZ,
-    realtor INT REFERENCES realtor_profile(id),
+    realtor INT REFERENCES realtor_profiles(id),
     description TEXT,
 	price FLOAT,
 	sold_price FLOAT,
@@ -127,7 +127,7 @@ CREATE TABLE user_favorites (
 CREATE TABLE realtor_reviews (
     id SERIAL PRIMARY KEY,
     originator INT REFERENCES users(id),
-    realtor INT REFERENCES realtor_profile(id),
+    realtor INT REFERENCES realtor_profiles(id),
     score INT,
     comment TEXT,
 	UNIQUE (originator, realtor)

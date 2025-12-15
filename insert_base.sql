@@ -52,7 +52,7 @@ INSERT INTO users (type, user_name, user_psw, name, email) VALUES
 ---------------------------------------------------------
 -- 6. REALTOR PROFILE (users 4,5,6)
 ---------------------------------------------------------
-INSERT INTO realtor_profile (id, agency) VALUES
+INSERT INTO realtor_profiles (id, agency) VALUES
 (4, 1),
 (5, 2),
 (6, 3);
@@ -60,7 +60,7 @@ INSERT INTO realtor_profile (id, agency) VALUES
 ---------------------------------------------------------
 -- 7. CUSTOMER PROFILE (users 1,2,3)
 ---------------------------------------------------------
-INSERT INTO customer_profile (id, adress) VALUES
+INSERT INTO customer_profiles (id, adress) VALUES
 (1, 1),
 (2, 2),
 (3, 3);
@@ -76,7 +76,7 @@ INSERT INTO real_estate_types (type) VALUES
 ---------------------------------------------------------
 -- 9. REAL ESTATES
 ---------------------------------------------------------
-INSERT INTO real_estates (real_estate_type, municipal, adress, size, no_of_rooms) VALUES
+INSERT INTO real_estates (real_estate_type, municipal, adress, living_space, no_of_rooms) VALUES
 (1, 1, 1, 150, 6),
 (1, 2, 2, 300, 8),
 (1, 3, 3, 110, 4),
@@ -94,7 +94,7 @@ INSERT INTO real_estate_images (real_estate, picture_link) VALUES
 ---------------------------------------------------------
 -- 11. HOUSE PROFILE (apply to properties 1 & 3)
 ---------------------------------------------------------
-INSERT INTO house_profile (id, building_plot) VALUES
+INSERT INTO house_profiles (id, building_plot) VALUES
 (1, 780),
 (2, 250),
 (3, 3000); 
@@ -102,7 +102,7 @@ INSERT INTO house_profile (id, building_plot) VALUES
 ---------------------------------------------------------
 -- 12. APARTMENT PROFILE (apply to property 2)
 ---------------------------------------------------------
-INSERT INTO apartment_profile (id, apartment_id, floor) VALUES
+INSERT INTO apartment_profiles (id, apartment_id, floor) VALUES
 (4, 'BRF-203', 2),
 (5, 'BRF-203-B', 2),
 (6, 'BRF-203-C', 3); 
