@@ -18,7 +18,7 @@ class CustomerUpdate(BaseModel):
     username: str = Field(..., max_length=50)
     email: EmailStr
     password: str = Field(..., min_length=8)
-    name: str | None = Field(None, max_length=50)
+    name: str = Field(..., max_length=50)
     
 class CustomerPatch(BaseModel):
     username: Optional[str] = Field(None, max_length=50)
@@ -38,8 +38,7 @@ class RealtorUpdate(BaseModel):
     username: str = Field(..., max_length=50)
     email: EmailStr
     password: str = Field(..., min_length=8)
-    name: str | None = Field(None, max_length=50)
-    agency: int | None
+    name: str = Field(..., max_length=50)
     
 # Ads
 class AdCreate(BaseModel):

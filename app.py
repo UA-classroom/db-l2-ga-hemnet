@@ -70,7 +70,7 @@ def get_ad(ad_id):
         ad = get_ad_db(con,ad_id)
         return {"ad": ad}
     except ValueError:
-        raise HTTPException(status_code=404, detail="customer not found")
+        raise HTTPException(status_code=404, detail="ad not found")
 @app.get("/realtor_reviews/")
 def get_all_realtor_reviews(limit: int=20):
     """ Return all reviews"""
@@ -155,14 +155,14 @@ def create_real_estates(user_input: RealestateCreate):
     }
 
 @app.post("/ads")
-def create_ad(ad_input: AdCreate):
+def create_ad(user_input: AdCreate):
     """
     Create a new ad in the 'ads' table.
     Returns the newly created ad object with its ID.
     """
     con = get_connection()
     try:
-        inserted = add_ad_db(con, ad_input)
+        inserted = add_ad_db(con, user_input)
     except ValueError:
         raise HTTPException(status_code=409, detail="username or email already exists")
     except psycopg2.errors.ForeignKeyViolation:

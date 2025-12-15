@@ -18,8 +18,16 @@ start with a connection parameter.
 - Below, a few inspirational functions exist - feel free to completely ignore how they are structured
 - E.g, if you decide to use psycopg3, you'd be able to directly use pydantic models with the cursor, these examples are however using psycopg2 and RealDictCursor
 """
-customer_type=1
-realtor_type=2
+
+
+def get_user_type_id(con,type):
+    with con:
+        with con.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM user_types WHERE type = %s;", (type,))
+            items = cursor.fetchone()
+            print(items)
+            user_type_id = items["id"]
+    return  user_type_id
 
 def build_partial_update_query(update_data: dict, table: str, pk: str = "id"):
     # Convert {"field": value} into "field = %s" clauses
@@ -50,16 +58,24 @@ def build_partial_update_query(update_data: dict, table: str, pk: str = "id"):
     return query, params
 
 def get_all_customers_db(con,limit):
+    type=get_user_type_id(con,'Kund')
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT * FROM users WHERE type = %s LIMIT %s;", (customer_type,limit))
+            #cursor.execute("SELECT user_name, user_psw, email FROM users WHERE type = %s LIMIT %s;", (type,limit))
+            cursor.execute("""select user_name, user_psw, email,street, street_no from users
+                            join customer_profiles on users.id=customer_profiles.id
+                            join adresses on customer_profiles.adress=adresses.id
+                            where type=%s LIMIT %s;""", (type,limit))
             items = cursor.fetchall()
     return items
 def get_customer_db(con, customer_id):
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
-                cursor.execute("SELECT * FROM users where id=%s;",
+                cursor.execute("""select user_name, user_psw, email,street, street_no from users
+                            join customer_profiles on users.id=customer_profiles.id
+                            join adresses on customer_profiles.adress=adresses.id
+                            where users.id=%s;""",
                            (customer_id))
                 items = cursor.fetchall()
             except Exception:
@@ -68,15 +84,20 @@ def get_customer_db(con, customer_id):
 def get_all_ads_db(con,limit):
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT * FROM ads LIMIT %s;", (limit,))
+            #cursor.execute("SELECT * FROM ads LIMIT %s;", (limit,))
+            cursor.execute("""select agreement, cust_users.name as customer, publish_date, end_date, realt_users.name as realtor, description, price, sold_price, status from ads
+                            join users cust_users on ads.customer = cust_users.id
+                            join users realt_users on ads.realtor = realt_users.id LIMIT %s;""", (limit,))
             items = cursor.fetchall()
     return items
-def get_ad_db(con, customer_id):
+def get_ad_db(con, ad_id):
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
-                cursor.execute("SELECT * FROM users where id=%s;",
-                           (customer_id))
+                cursor.execute("""select agreement, cust_users.name as customer, publish_date, end_date, realt_users.name as realtor, description, price, sold_price, status from ads
+                            join users cust_users on ads.customer = cust_users.id
+                            join users realt_users on ads.realtor = realt_users.id where ads.id=%s;""",
+                           (ad_id,))
                 items = cursor.fetchall()
             except Exception:
                 raise ValueError("Customer ID not valid")
@@ -84,16 +105,17 @@ def get_ad_db(con, customer_id):
 def get_all_realtor_reviews_db(con,limit):
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT * FROM realtor_reviews LIMIT %s;", (limit,))
+            cursor.execute("""select cust_users.name as customer, realt_users.name as realtor, score, comment from realtor_reviews
+                            join users cust_users on realtor_reviews.originator = cust_users.id
+                            join users realt_users on realtor_reviews.realtor = realt_users.id LIMIT %s;""", (limit,))
             items = cursor.fetchall()
     return items
 
 def add_customer_db(con,user_input):
+    type=get_user_type_id(con,'Mäklare')
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
-                type=customer_type
-
                 cursor.execute(
                     "INSERT INTO users (type, user_name, user_psw, email) VALUES (%s,%s,%s,%s) RETURNING id;",
                     (type, user_input.username, user_input.password, user_input.email)
@@ -113,10 +135,10 @@ def add_customer_db(con,user_input):
     return inserted
 
 def add_realtor_db(con,user_input):
+    type=get_user_type_id(con,'Mäklare')
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
-                type=realtor_type
                 cursor.execute(
                     "INSERT INTO users (type, user_name, user_psw, email) VALUES (%s,%s,%s,%s) RETURNING id;",
                     (type, user_input.username, user_input.password, user_input.email)
@@ -256,12 +278,13 @@ def update_customer_db(con, customer_id: int, customer_update):
     updates a customer's data.
     Returns the updated customer object.
     """
+    type=get_user_type_id(con,'Kund')
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
                 cursor.execute(
                     "UPDATE users SET type=%s, user_name=%s, user_psw=%s, email=%s, name=%s WHERE id=%s RETURNING *;",
-                    (customer_type, customer_update.username, customer_update.password, customer_update.email, customer_update.name, customer_id)
+                    (type, customer_update.username, customer_update.password, customer_update.email, customer_update.name, customer_id)
                 )
                 row = cursor.fetchone()
                 if not row:
@@ -278,12 +301,13 @@ def update_realtor_db(con, realtor_id: int, realtor_update):
     updates a realtor's data.
     Returns the updated realtor object.
     """
+    type=get_user_type_id(con,'Mäklare')
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
                 cursor.execute(
                     "UPDATE users SET type=%s, user_name=%s, user_psw=%s, email=%s, name=%s WHERE id=%s RETURNING *;",
-                    (realtor_type, realtor_update.username, realtor_update.password, realtor_update.email, realtor_update.name, realtor_id)
+                    (type, realtor_update.username, realtor_update.password, realtor_update.email, realtor_update.name, realtor_id)
                 )
                 row = cursor.fetchone()
                 if not row:
@@ -365,10 +389,9 @@ def update_ad_db(con, ad_id: int, ad_update):
     return row
 
 def patch_customer_db(con,customer_id, update_data):
-    print(update_data)
+
     query, params = build_partial_update_query(update_data, table="users", pk="id")
     params[-1] = customer_id  # set PK
-    print(query)
 
     try:
         with con:
