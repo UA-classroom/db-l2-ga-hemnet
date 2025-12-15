@@ -1,6 +1,9 @@
 import os
 
 import psycopg2
+#import psycopg2.extras
+from psycopg2.extras import RealDictCursor
+
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -29,9 +32,51 @@ def create_tables():
     """
     A function to create the necessary tables for the project.
     """
-    connection = get_connection()
+    con = get_connection()
+    print("hej")
+    """
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM ads;")
+            items = cursor.fetchall()
+    print(items)
+    """
     # Implement
-    pass
+    
+  
+    cur = con.cursor()
+    # create tables
+    with open("db_setup.sql", "r") as f:
+        sql_commands = f.read()
+
+    for command in sql_commands.split(";"):
+        cmd = command.strip()
+        if cmd:  # ignore empty commands
+            cur.execute(cmd)
+
+    #con.commit()
+    #con.close()
+    
+    # insert basicdata
+    with open("insert_base.sql", "r") as f:
+        sql_commands = f.read()
+
+    for command in sql_commands.split(";"):
+        cmd = command.strip()
+        if cmd:  # ignore empty commands
+            cur.execute(cmd)
+
+    con.commit()
+    cur.close()
+    con.close()
+    
+
+def get_items(con):
+    with con:
+        with con.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM items;")
+            items = cursor.fetchall()
+    return items 
 
 
 if __name__ == "__main__":
