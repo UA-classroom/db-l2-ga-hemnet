@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS realtor_reviews CASCADE;
-DROP TABLE IF EXISTS user_favorites CASCADE;
+DROP TABLE IF EXISTS customer_favorites CASCADE;
 DROP TABLE IF EXISTS ad_images CASCADE;
 DROP TABLE IF EXISTS ads_real_estates CASCADE;
 DROP TABLE IF EXISTS ads CASCADE;
@@ -53,12 +53,12 @@ CREATE TABLE users (
 );
 
 CREATE TABLE realtor_profiles (
-    id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    id INT PRIMARY KEY REFERENCES users(id),
     agency INT REFERENCES broker_agencies(id)
 );
 
 CREATE TABLE customer_profiles (
-    id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    id INT PRIMARY KEY REFERENCES users(id),
     adress INT REFERENCES adresses(id)
 );
 
@@ -78,17 +78,17 @@ CREATE TABLE real_estates (
 
 CREATE TABLE real_estate_images (
     id SERIAL PRIMARY KEY,
-    real_estate INT REFERENCES real_estates(id),
+    real_estate INT REFERENCES real_estates(id) ON DELETE CASCADE,
     picture_link VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE house_profiles (
-    id INT PRIMARY KEY REFERENCES real_estates(id),
+    id INT PRIMARY KEY REFERENCES real_estates(id) ON DELETE CASCADE,
     building_plot FLOAT
 );
 
 CREATE TABLE apartment_profiles (
-    id INT PRIMARY KEY REFERENCES real_estates(id),
+    id INT PRIMARY KEY REFERENCES real_estates(id) ON DELETE CASCADE,
     apartment_id VARCHAR(50),
     floor INT
 );
@@ -96,10 +96,10 @@ CREATE TABLE apartment_profiles (
 CREATE TABLE ads (
     id SERIAL PRIMARY KEY,
     agreement VARCHAR(255),
-    customer INT REFERENCES customer_profiles(id),
+    customer INT REFERENCES customer_profiles(id) ON DELETE SET NULL,
     publish_date TIMESTAMPTZ,
 	end_date TIMESTAMPTZ,
-    realtor INT REFERENCES realtor_profiles(id),
+    realtor INT REFERENCES realtor_profiles(id) ON DELETE SET NULL,
     description TEXT,
 	price FLOAT,
 	sold_price FLOAT,
@@ -107,27 +107,27 @@ CREATE TABLE ads (
 );
 
 CREATE TABLE ads_real_estates (
-    ad INT REFERENCES ads(id),
-    real_estate INT REFERENCES real_estates(id),
+    ad INT REFERENCES ads(id) ON DELETE CASCADE,
+    real_estate INT REFERENCES real_estates(id) ON DELETE CASCADE,
     PRIMARY KEY (ad, real_estate)
 );
 
 CREATE TABLE ad_images (
-    ad INT REFERENCES ads(id),
-    picture INT REFERENCES real_estate_images(id),
+    ad INT REFERENCES ads(id) ON DELETE CASCADE,
+    picture INT REFERENCES real_estate_images(id) ON DELETE CASCADE,
     PRIMARY KEY (ad, picture)
 );
 
-CREATE TABLE user_favorites (
-    usr INT REFERENCES users(id),
-    ad INT REFERENCES ads(id),
-    PRIMARY KEY (usr, ad)
+CREATE TABLE customer_favorites (
+    customer INT REFERENCES users(id),
+    ad INT REFERENCES ads(id) ON DELETE CASCADE,
+    PRIMARY KEY (customer, ad)
 );
 
 CREATE TABLE realtor_reviews (
     id SERIAL PRIMARY KEY,
-    originator INT REFERENCES users(id),
-    realtor INT REFERENCES realtor_profiles(id),
+    originator INT REFERENCES users(id) ON DELETE SET NULL,
+    realtor INT REFERENCES realtor_profiles(id) ON DELETE SET NULL,
     score INT,
     comment TEXT,
 	UNIQUE (originator, realtor)

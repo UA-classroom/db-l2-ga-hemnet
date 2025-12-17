@@ -134,7 +134,7 @@ INSERT INTO ad_images (ad, picture) VALUES
 ---------------------------------------------------------
 -- 16. USER FAVORITES
 ---------------------------------------------------------
-INSERT INTO user_favorites (usr, ad) VALUES
+INSERT INTO customer_favorites (customer, ad) VALUES
 (1, 2),
 (2, 1),
 (3, 3);

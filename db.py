@@ -214,6 +214,8 @@ def delete_customer_db(con, customer_id: int):
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
+                cursor.execute("DELETE FROM customer_favorites WHERE customer = %s RETURNING customer;", (customer_id,))
+                cursor.execute("DELETE FROM customer_profiles WHERE id = %s RETURNING id;", (customer_id,))
                 cursor.execute("DELETE FROM users WHERE id = %s RETURNING id;", (customer_id,))
                 result = cursor.fetchone()
                 if not result:
@@ -227,6 +229,7 @@ def delete_realtor_db(con, realtor_id: int):
     with con:
         with con.cursor(cursor_factory=RealDictCursor) as cursor:
             try:
+                cursor.execute("DELETE FROM realtor_profiles WHERE id = %s RETURNING id;", (realtor_id,))
                 cursor.execute("DELETE FROM users WHERE id = %s RETURNING id;", (realtor_id,))
                 result = cursor.fetchone()
                 if not result:

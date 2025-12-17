@@ -324,10 +324,6 @@ def patch_customer(customer_id: int, customer_patch: CustomerPatch):
         result=patch_customer_db(con,customer_id, update_data)
     except ValueError:
         raise HTTPException(status_code=404, detail="customer not found")
-#    except psycopg2.errors.ForeignKeyViolation:
-#        raise HTTPException(status_code=409, detail="Foreign Key error")
-#    except psycopg2.errors.UniqueViolation:
-#        raise HTTPException(status_code=409, detail="Unique constraint violated")
     except Exception as e:
         raise HTTPException(status_code=409, detail=str(e))
     return result
