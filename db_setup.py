@@ -1,6 +1,10 @@
 import os
 
 import psycopg2
+
+# import psycopg2.extras
+from psycopg2.extras import RealDictCursor
+
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -27,14 +31,35 @@ def get_connection():
 
 def create_tables():
     """
-    A function to create the necessary tables for the project.
+    A function to create the necessary tables for the project and insert a base dataset.
     """
-    connection = get_connection()
-    # Implement
-    pass
+    con = get_connection()
+    cur = con.cursor()
+
+    # create tables
+    with open("db_setup.sql", "r") as f:
+        sql_commands = f.read()
+
+    for command in sql_commands.split(";"):
+        cmd = command.strip()
+        if cmd:  # ignore empty commands
+            cur.execute(cmd)
+
+    # insert base data
+    with open("insert_base_dataset.sql", "r") as f:
+        sql_commands = f.read()
+
+    for command in sql_commands.split(";"):
+        cmd = command.strip()
+        if cmd:  # ignore empty commands
+            cur.execute(cmd)
+
+    con.commit()
+    cur.close()
+    con.close()
 
 
 if __name__ == "__main__":
     # Only reason to execute this file would be to create new tables, meaning it serves a migration file
     create_tables()
-    print("Tables created successfully.")
+    print("Tables created successfully, and base dataset is loaded")
