@@ -1,7 +1,8 @@
 import os
 
 import psycopg2
-#import psycopg2.extras
+
+# import psycopg2.extras
 from psycopg2.extras import RealDictCursor
 
 from dotenv import load_dotenv
@@ -34,7 +35,7 @@ def create_tables():
     """
     con = get_connection()
     cur = con.cursor()
-    
+
     # create tables
     with open("db_setup.sql", "r") as f:
         sql_commands = f.read()
@@ -56,7 +57,8 @@ def create_tables():
     con.commit()
     cur.close()
     con.close()
-    
+
+
 if __name__ == "__main__":
     # Only reason to execute this file would be to create new tables, meaning it serves a migration file
     create_tables()
